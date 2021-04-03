@@ -9,34 +9,34 @@
 .DESCRIPTION
     Create Azure AD Service Principal and the GH Secret for the workflow deployment
 .EXAMPLE
-    . .\Scripts\Sync-AzBuildComponent.ps1 -rgName ACU1-BRW-HAA-RG-G1 -RoleName 'Storage Blob Data Contributor'
+    . .\Scripts\Create-GhActionsSecret.ps1 -rgName ACU1-BRW-HAA-RG-G1 -RoleName 'Storage Blob Data Contributor'
 
 #>
 
 param (
     [string]$rgName = 'ACU1-BRW-HAA-RG-G1',
-    [int]$SecretExpiryYears = 5,
-    [string]$RoleName = 'Storage Blob Data Contributor'
+    [string]$RoleName = 'Storage Blob Data Contributor',
+    [int]$SecretExpiryYears = 5
 )
 
-if (get-command gh)
+if (Get-Command gh)
 {
-    gh --version | select -first 1
+    gh --version | Select-Object -First 1
 }
 else 
 {
-    throw "please install GH.exe to create GH secret [https://github.com/cli/cli/releases/latest]"
+    throw 'please install GH.exe to create GH secret [https://github.com/cli/cli/releases/latest]'
 }
 
 $repo = git config --get remote.origin.url
 if ($repo)
 {
-    echo "Your local repo is: $($repo)"
-    $GHProject = ( $repo | Split-Path -Leaf ) -replace '.git',''
+    Write-Output "Your local repo is: $($repo)"
+    $GHProject = ( $repo | Split-Path -Leaf ) -replace '.git', ''
 }
 else 
 {
-    throw "please set location to a Git repo for which to create the secret"
+    throw 'please set location to a Git repo for which to create the secret'
 }
 
 # Runs under Service Principal that is owner
@@ -45,30 +45,30 @@ $Tenant = $Context.Tenant.Id
 $SubscriptionID = $Context.Subscription.Id
 $Scope = "/subscriptions/$SubscriptionID/resourceGroups/$rgName"
 
-echo "Your context is: $($Context | FL -Property Name,Account,Subscription,Tenant | out-String)"
+Write-Output "Your context is: $($Context | Format-List -Property Name,Account,Subscription,Tenant | Out-String)"
 
 if ($Context)
 {
     $RG = Get-AzResourceGroup -Id $Scope
     if ($RG)
     {
-        Write-Verbose -Message "Setting SP RBAC on      : [$RoleName] on [$($RG.ResourceId)]" -verbose
+        Write-Verbose -Message "Setting SP RBAC on      : [$RoleName] on [$($RG.ResourceId)]" -Verbose
     }
     else 
     {
-        throw "please select the correct Azure Account/Subscription/ResourceGroup"
+        throw 'please select the correct Azure Account/Subscription/ResourceGroup'
     }
 }
 else 
 {
-    throw "please select the correct Azure Account"
+    throw 'please select the correct Azure Account'
 }
 
-$SecretName = $rgName -replace "\W", '_'
+$SecretName = $rgName -replace '\W', '_'
 $ServicePrincipalName = "GH_${GHProject}_$SecretName"
 
-Write-Verbose -Message "Creating GH Secret Name : [$($SecretName)] in [$($GHProject)] git Secrets" -verbose
-Write-Verbose -Message "Creating Azure AD SP    : [$($ServicePrincipalName)]" -verbose
+Write-Verbose -Message "Creating GH Secret Name : [$($SecretName)] in [$($GHProject)] git Secrets" -Verbose
+Write-Verbose -Message "Creating Azure AD SP    : [$($ServicePrincipalName)]" -Verbose
 
 #region Create the Service Principal in Azure AD
 $appID = Get-AzADApplication -IdentifierUri "http://$ServicePrincipalName"
@@ -76,6 +76,8 @@ if (! $appID)
 {
     # Create Service Principal
     New-AzADServicePrincipal -DisplayName $ServicePrincipalName -OutVariable sp -EndDate (Get-Date).AddYears($SecretExpiryYears) -Role $RoleName -Scope $Scope
+    # Add reader scope as well
+    New-AzRoleAssignment -ResourceGroupName $rgName -ObjectId $sp[0].Id -RoleDefinitionName reader -verbose
     $pw = [pscredential]::new('user', $sp.secret).GetNetworkCredential().Password
     
     $appID = Get-AzADApplication -DisplayName $ServicePrincipalName
