@@ -36,5 +36,6 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-          ls env:
+          get-psdrive
+          dir env:
           
