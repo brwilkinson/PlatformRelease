@@ -17,7 +17,7 @@ env:
   APP: ABC
   ENV: S1
   PREFIX: ACU1
-  BASE: ${{ DEPLOYMENT_BASEPATH }}
+  BASE: $DEPLOYMENT_BASEPATH
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
