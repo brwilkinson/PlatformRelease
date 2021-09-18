@@ -1,7 +1,7 @@
 # PlatformRelease (Pipeline/Workflow Release Tools)
 Tools for releasing artifacts via Build, Release Pipelines for App Platform Components
 
-####  DevOps / GitHub Actions Scripts and workflows for App Stagin
+####  DevOps / GitHub Actions Scripts and workflows for Staging Builds
 
 This works in conjunction with: [brwilkinson/AppReleaseDSC](https://github.com/brwilkinson/AppReleaseDSC)
 
