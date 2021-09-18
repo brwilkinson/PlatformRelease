@@ -23,7 +23,7 @@ The scripts in this Project:
 - Can be executed in Azure DevOps Pipelines
 - Can be executed in GitHub Actions
 
-- The associated DSC resource runs on VM or VMSS in your Environment in a Pull Mode
+- The associated DSC resource runs on VM or VMSS in your Environment
     - Reads the manifest files for the environment that it is in
     - Pulls the correct build down to the machine
     - Essentially the Release component (Part 2.)
