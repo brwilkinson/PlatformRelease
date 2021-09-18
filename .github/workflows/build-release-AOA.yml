@@ -3,10 +3,12 @@ name: .NET AOA D
 # Creds below should be updated with your Prefix, App and Org Names
 
 on:
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
   pull_request:
     branches: [main]
+
+  workflow_dispatch:
 
 env:
   Component: LogHeadersAPI
