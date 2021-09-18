@@ -1,5 +1,5 @@
 # PlatformRelease (Pipeline/Workflow Release Tools)
-Tools for releasing artifacts via Build, Release Pipelines for a Platform of Components
+Tools for releasing artifacts via Build, Release Pipelines for App Platform Components
 
 ####  DevOps / GitHub Actions Scripts and workflows for App Stagin
 
