@@ -14,6 +14,9 @@ This works in conjunction with: [brwilkinson/AppReleaseDSC](https://github.com/b
     - Updates a manifest file that contains the Build version that is mapped to an Environment
         - This is automatically updated during this release
         - Assuming if the workflow is authorized to run then that release should be updated in the associated Environment
+        - This is the BASIC version of this script/process
+            - I recommend to keep this file in a Git Repo and pull/update the contents, then push to the repo prior to copying to the storage account.
+                - TODO Add a second version of the script with Git Integration and Retries if the push fails.
 
 The scripts in this Project:
 - Can be tested locally
