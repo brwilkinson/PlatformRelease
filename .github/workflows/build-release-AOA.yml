@@ -1,0 +1,75 @@
+name: .NET AOA D
+
+# Creds below should be updated with your Prefix, App and Org Names
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  Component: LogHeadersAPI
+  BuildName: 0.2.${{ github.run_number }}
+  Environment: D
+  App: aoa
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+      - name: Publish
+        run: dotnet publish --configuration Release --output ${{ env.DEPLOYMENT_BASEPATH }}/${{env.Component }}/${{env.BuildName }}
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{env.Component }}_${{ env.BuildName }}
+          path: ${{ env.DEPLOYMENT_BASEPATH }}/${{ env.Component }}/${{ env.BuildName }}/
+
+      - name: Login via Az module
+        uses: azure/login@v1
+        with:
+          creds: ${{secrets.ACU1_BRW_AOA_RG_G1}}
+          enable-AzPSSession: true
+
+      - name: G1_RG_UploadArtifacts_to_Blob
+        uses: Azure/powershell@v1
+        with:
+          inlineScript: |
+            Get-ChildItem -Path $env:DEPLOYMENT_BASEPATH -Recurse
+            $Params = @{
+                BuildName     = $env:BuildName
+                ComponentName = $env:Component
+                BasePath      = $env:DEPLOYMENT_BASEPATH
+                App           = $env:App
+            }
+            & ./Scripts/Sync-AzBuildComponent.ps1 @Params
+          azPSVersion: latest
+
+      - name: G1_RG_UpdateBuildMeta_to_Blob
+        uses: Azure/powershell@v1
+        with:
+          inlineScript: |
+            $home
+            Get-ChildItem $home
+            $Params = @{
+                BuildName     = $env:BuildName
+                ComponentName = $env:Component
+                BasePath      = $env:DEPLOYMENT_BASEPATH
+                Environment   = $env:Environment
+                App           = $env:App
+            }
+            & ./Scripts/Update-AzBuildMetaData.ps1 @Params
+          azPSVersion: latest

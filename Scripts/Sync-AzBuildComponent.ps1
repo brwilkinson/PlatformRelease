@@ -33,12 +33,12 @@ function Sync-AzBuildComponent
     Param (
         [String]$BuildName = '4.2',
         [String]$ComponentName = 'LogHeadersAPI',
-        [String]$BasePath = 'D:\Builds'
-    )
+        [String]$BasePath = 'D:\Builds',
 
-    # Azure Blob Container Info
-    [String]$SAName = 'acu1brwhaag1saglobal'
-    [String]$ContainerName = 'builds'
+        # Azure Blob Container Info
+        [String]$SAName = 'acu1brwhaag1saglobal',
+        [String]$ContainerName = 'builds'
+    )
 
     # Get context using Oauth
     $Context = New-AzStorageContext -StorageAccountName $SAName -UseConnectedAccount
@@ -62,7 +62,7 @@ function Sync-AzBuildComponent
 
     # Find all of the files in the share including subfolders
     $Path = "$ComponentName/$BuildName/*"
-    $DestinationFiles = Get-AzStorageBlob @StorageContainerParams -Blob $Path | Foreach Name
+    $DestinationFiles = Get-AzStorageBlob @StorageContainerParams -Blob $Path | ForEach-Object Name
 
     # Compare the new files that were uploaded to the files already on the share
     # these should be deleted from the Azure Blob Container

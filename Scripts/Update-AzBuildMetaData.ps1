@@ -25,12 +25,12 @@ Param (
     [String]$ComponentName = 'LogHeadersAPI',
     [String]$BasePath = 'D:\Builds',
     [String]$Environment = 'D',
-    [String]$MetaDataFileName = 'ComponentBuild.json'
+    [String]$MetaDataFileName = 'ComponentBuild.json',
+    
+    # Azure Blob Container Info
+    [String]$SAName = 'acu1brwhaag1saglobal',
+    [String]$ContainerName = 'builds'
 )
-
-# Azure Blob Container Info
-[String]$SAName = 'acu1brwhaag1saglobal'
-[String]$ContainerName = 'builds'
 
 # Get context using Oauth
 $Context = New-AzStorageContext -StorageAccountName $SAName -UseConnectedAccount
@@ -40,19 +40,19 @@ $StorageContainerParams = @{
     Context   = $Context
 }
 
-Get-AzStorageBlob @StorageContainerParams -Blob $ComponentName/$MetaDataFileName | ft -AutoSize
+Get-AzStorageBlob @StorageContainerParams -Blob $ComponentName/$MetaDataFileName | Format-Table -AutoSize
 Get-AzStorageBlobContent -Force @StorageContainerParams -Blob $ComponentName/$MetaDataFileName -Destination $BasePath/$ComponentName/$MetaDataFileName -Verbose
 
-$data = Get-Content -path $BasePath/$ComponentName/$MetaDataFileName | ConvertFrom-Json
-Write-Verbose -Message "Previous Build in [$environment] was [$($data.ComponentName.$ComponentName.$Environment.DefaultBuild)]" -verbose
-Write-Verbose -Message "Current  Build in [$environment] is  [$BuildName]" -verbose
+$data = Get-Content -Path $BasePath/$ComponentName/$MetaDataFileName | ConvertFrom-Json
+Write-Verbose -Message "Previous Build in [$environment] was [$($data.ComponentName.$ComponentName.$Environment.DefaultBuild)]" -Verbose
+Write-Verbose -Message "Current  Build in [$environment] is  [$BuildName]" -Verbose
 $data.ComponentName.$ComponentName.$Environment.DefaultBuild = $BuildName
 
 $data | ConvertTo-Json -Depth 5 | Set-Content -Path $BasePath/$ComponentName/$MetaDataFileName -PassThru
 
-Set-AzStorageBlobContent @StorageContainerParams -File $BasePath/$ComponentName/$MetaDataFileName -Blob $ComponentName/$MetaDataFileName -Verbose -Force | ft -AutoSize
+Set-AzStorageBlobContent @StorageContainerParams -File $BasePath/$ComponentName/$MetaDataFileName -Blob $ComponentName/$MetaDataFileName -Verbose -Force | Format-Table -AutoSize
 
 if ($?)
 {
-    Write-Verbose -Message "MetaData File Upload to Blob is Complete" -Verbose
+    Write-Verbose -Message 'MetaData File Upload to Blob is Complete' -Verbose
 }
