@@ -7,7 +7,7 @@ This works in conjunction with: [brwilkinson/AppReleaseDSC](https://github.com/b
 
 #### Overview of the Release process
 
-- The YAML file .github\workflows\build-release-AOA.yml builds your App
+- The YAML file .github\workflows\build-release-AOA.yml builds your App:
     - Essentially the Build component (Part 1.)
     - Copy the build artifacts to a Global Storage Account
     - Publish artifacts in GitHub
@@ -15,7 +15,7 @@ This works in conjunction with: [brwilkinson/AppReleaseDSC](https://github.com/b
         - This is automatically updated during this release
         - Assuming if the workflow is authorized to run then that release should be updated in the associated Environment
 
-The scripts in this Project
+The scripts in this Project:
 - Can be tested locally
 - Can be executed in Azure DevOps Pipelines
 - Can be executed in GitHub Actions
